@@ -60,6 +60,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
+// Used https://abhichn.medium.com/how-to-create-a-list-in-jetpack-compose-using-lazycolumn-d8a6beb5bf65 for lazyColumn help
 fun AmphibianColumnScreen(data: List<AmphibianData>, modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
