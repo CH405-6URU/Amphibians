@@ -3,17 +3,24 @@ package com.example.amphibians
 import android.media.Image
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
+import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter.State.Empty.painter
+import coil.request.ImageRequest
 import com.example.amphibians.ui.theme.AmphibiansTheme
 
 
@@ -22,9 +29,10 @@ fun HomeScreen(amphibianUiState: AmphibianUiState, modifier: Modifier = Modifier
     when (amphibianUiState) {
         is AmphibianUiState.Loading -> LoadingScreen(modifier)
         is AmphibianUiState.Error -> ErrorScreen(modifier)
-        is AmphibianUiState.Success -> FrogScreen(data = amphibianUiState.data)
+        is AmphibianUiState.Success -> AmphibianColumnScreen(data = amphibianUiState.data)
     }
 }
+
 // Loading Screen
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
@@ -51,26 +59,48 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
     }
 }
 
-// TODO Convert the list data to be displayed instead of raw string data
+@Composable
+fun AmphibianColumnScreen(data: List<AmphibianData>, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(4.dp)
+    ) {
+        items(data) {
+            AmphibianDataCard(data = it)
+        }
+    }
+}
 
 @Composable
-fun FrogScreen(data: List<AmphibianData>) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+fun AmphibianDataCard(data: AmphibianData, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .padding(4.dp)
+            .fillMaxWidth()
+            .aspectRatio(1f),
+        elevation = 4.dp,
     ) {
-        Text(text = "Great Basin Spadefoot (Toad)", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Text(
-            text = data.toString(),
-            fontSize = 14.sp
-        )
-        Image(
-            painter = painterResource(id = R.drawable.great_basin_spadefoot),
-            contentDescription = "Toad",
-            Modifier.padding(top = 5.dp)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = data.name, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text(text = data.type, fontSize = 20.sp)
+            Text(
+                text = data.description,
+                fontSize = 14.sp
+            )
+            AsyncImage(
+                model = ImageRequest.Builder(context = LocalContext.current)
+                    .data(data.imgSrc)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Amphibian image",
+                Modifier.padding(top = 5.dp)
+            )
+        }
     }
 }
 
@@ -79,6 +109,6 @@ fun FrogScreen(data: List<AmphibianData>) {
 fun DefaultPreview() {
     AmphibiansTheme {
         val mockData = List(10) { AmphibianData("$it", "", "", "") }
-        FrogScreen(mockData)
+        AmphibianColumnScreen(mockData)
     }
 }
