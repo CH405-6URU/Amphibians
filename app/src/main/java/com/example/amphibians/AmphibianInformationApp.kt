@@ -10,7 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 // Initiates the app and calls the home screen function
 @Composable
-fun AmphibianInformationApp(){
+fun AmphibianInformationApp(viewModel: AmphibianViewModel) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) }
@@ -21,7 +21,7 @@ fun AmphibianInformationApp(){
                 .padding(it),
             color = MaterialTheme.colors.background
         ) {
-            val amphibianViewModel: AmphibianViewModel = viewModel()
+            val amphibianViewModel: AmphibianViewModel = viewModel(factory = AmphibianViewModel.Factory)
             HomeScreen(amphibianUiState = amphibianViewModel.amphibianUiState)
         }
     }

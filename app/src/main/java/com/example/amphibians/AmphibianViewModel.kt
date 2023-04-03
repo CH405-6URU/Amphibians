@@ -3,7 +3,13 @@ package com.example.amphibians
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.*
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.amphibians.ui.theme.AmphibianDataRepository
+import com.example.amphibians.ui.theme.DefaultAmphibianDataRepository
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -15,15 +21,9 @@ sealed interface AmphibianUiState {
 }
 
 
-class AmphibianViewModel() : ViewModel() {
-    // I think I need 3 variables for each part of the card but I do not see why this could not be
-    // replaced with 1 list later.
-    var amphibianUiState: AmphibianUiState by mutableStateOf(AmphibianUiState.Loading)
-//    var amphibianTitle: String by mutableStateOf("")
-//    var amphibianType: String by mutableStateOf("")
-//    var amphibianDescription: String by mutableStateOf("")
-//    var amphibianImage: String by mutableStateOf("")
+class AmphibianViewModel(private val amphibianDataRepository: AmphibianDataRepository) : ViewModel() {
 
+    var amphibianUiState: AmphibianUiState by mutableStateOf(AmphibianUiState.Loading)
 
     init{
         getAmphibianData()
@@ -33,10 +33,18 @@ class AmphibianViewModel() : ViewModel() {
         viewModelScope.launch {
             amphibianUiState = AmphibianUiState.Loading
             amphibianUiState = try {
-                val result = AmphibianApi.retrofitService.getAmphibians()
-                AmphibianUiState.Success(result)
+                AmphibianUiState.Success(amphibianDataRepository.peepeepoopoo())
             } catch (e: IOException) {
                 AmphibianUiState.Error
+            }
+        }
+    }
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as AmphibianDataApplication)
+                val amphibianDataRepository = application.container.amphibianDataRepository
+                AmphibianViewModel(amphibianDataRepository = amphibianDataRepository)
             }
         }
     }
